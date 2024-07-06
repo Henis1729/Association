@@ -18,7 +18,29 @@ module.exports = {
     },
     ROLE: {
       USER: 'user',
+      TENANT: 'tenant',
+      LANDLORD: 'landlord',
       ADMIN: 'admin',
+    },
+    ACCOMODATIONS: {
+      APARTMENT: 'apartment',
+      HOUSE: 'house',
+      BASEMENT: 'basement',
+    },
+    GENDER: {
+      GIRL: 'girl',
+      BOY: 'boy',
+    },
+    DIETARY: {
+      VEG:'vegetarian',
+      NONVEG: 'non vegetarian',
+      VEGAN: 'vegan'
+    },
+    DURATIONTYPE: {
+      DAY:'day',
+      WEEK: 'week',
+      MONTH:'month',
+      YEAR: 'year',
     },
   },
   MESSAGE: {
