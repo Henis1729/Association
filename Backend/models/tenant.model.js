@@ -41,11 +41,15 @@ const tenantSchema = new Schema(
       type: String,
       required: true,
     },
+    contactPersonEmail : {
+      type: String,
+      required: true,
+    },
     contactPersonNumber : {
       type: String,
       required: true,
     },
-    Laundry : {
+    laundry : {
       type: Boolean,
       default: true,
       required: true
@@ -70,6 +74,11 @@ const tenantSchema = new Schema(
     startDate: {
        type : Date,
        required: true
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
     },
     isActive: {
       type: Boolean,
