@@ -13,6 +13,7 @@ const userSchema = new Schema(
     firstName: String,
     lastName: String,
     mobile: String,
+    callingCode: String, 
     password: String,
     roleId: {
       type: Schema.Types.ObjectId,

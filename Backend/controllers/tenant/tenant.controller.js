@@ -7,16 +7,25 @@ const helpers = {};
 const controllers = {
   createTenant: async (req, res) => {
 
-    //* check if category already exists by name
-    const categoryExists = await DB.TENANT.findOne({ name: req.body.name });
+    if (req?.user?._id) {
+      req.body = { ...req.body, userId: req.user._id };
+    }
 
-    if (categoryExists)
-      return response.DUPLICATE_VALUE({
-        res,
-        message: MESSAGE.ALREADY_EXISTS,
-        payload: { name: req.body.name },
-      });
+    let { city, nearByLocation,
+      totalPerson, startDate,
+      contactPersonName, contactPersonEmail,
+      contactPersonNumber, duration, durationType, 
+      dietary, accomodationType } = req.body
 
+    req.body.sharingMessage =
+      `**Looking for ${accomodationType ? accomodationType : "" } " Accommodation"** in ${city} ${nearByLocation ? "near by " + nearByLocation : ""}
+    for ${totalPerson} person from ${startDate} 
+     ${dietary ? "Preferable " + dietary : ""} 
+    ${duration && durationType ? "Preferable duration " + duration + durationType : ""}
+    ${nearByLocation ? "near by" + nearByLocation : ""}
+    Please DM ${contactPersonName} on ${contactPersonNumber} or 
+    email at ${contactPersonEmail}.`
+    
     //* create Tenant
     await DB.TENANT.create(req.body);
 

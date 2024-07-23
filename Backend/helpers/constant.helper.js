@@ -26,10 +26,11 @@ module.exports = {
       APARTMENT: 'apartment',
       HOUSE: 'house',
       BASEMENT: 'basement',
+      ANY: 'any',
     },
     GENDER: {
-      GIRL: 'girl',
-      BOY: 'boy',
+      MALE: 'male',
+      FEMALE: 'female',
     },
     DIETARY: {
       VEG:'vegetarian',

@@ -37,6 +37,9 @@ const tenantSchema = new Schema(
       type: String,
       required: true,
     },
+    nearByLocation: {
+      type: String,
+    },
     contactPersonName : {
       type: String,
       required: true,
@@ -46,6 +49,10 @@ const tenantSchema = new Schema(
       required: true,
     },
     contactPersonNumber : {
+      type: String,
+      required: true,
+    },
+    contactPersonCallingCode : {
       type: String,
       required: true,
     },
@@ -69,6 +76,9 @@ const tenantSchema = new Schema(
       type: String,
     },
     homeCountry: {
+      type: String,
+    },
+    sharingMessage: {
       type: String,
     },
     startDate: {

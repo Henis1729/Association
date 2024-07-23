@@ -11,6 +11,7 @@ module.exports = {
       password: Joi.string().required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
+      callingCode: Joi.string().trim().required(),
       mobile: Joi.string()
         .pattern(/^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/)
         .message('Invalid mobile number')

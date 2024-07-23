@@ -12,24 +12,28 @@ const {
 
 router.post(
   "/",
+  auth({ usersAllowed: ['user'] }),
   VALIDATOR.createTenant,
   APIS.createTenant
 );
 
 router.get(
   "/",
+  auth({ usersAllowed: ['*'] }),
   VALIDATOR.getTenant,
   APIS.getTenant
 );
 
 router.put(
   "/",
+  auth({ usersAllowed: ['user'] }),
   VALIDATOR.updateTenant,
   APIS.updateTenant
 );
 
 router.delete(
   "/",
+  auth({ usersAllowed: ['user'] }),
   VALIDATOR.deleteTenant,
   APIS.deleteTenant
 );
