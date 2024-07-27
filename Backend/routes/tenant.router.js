@@ -7,12 +7,12 @@ const {
 } = require("../helpers/constant.helper");
 
 const {
-    TENANT: { VALIDATOR, APIS },
+  TENANT: { VALIDATOR, APIS },
 } = require("../controllers");
 
 router.post(
   "/",
-  auth({ usersAllowed: ['user'] }),
+  auth({ usersAllowed: ['user', "admin"] }),
   VALIDATOR.createTenant,
   APIS.createTenant
 );
@@ -26,14 +26,14 @@ router.get(
 
 router.put(
   "/",
-  auth({ usersAllowed: ['user'] }),
+  auth({ usersAllowed: ['user', "admin"] }),
   VALIDATOR.updateTenant,
   APIS.updateTenant
 );
 
 router.delete(
   "/",
-  auth({ usersAllowed: ['user'] }),
+  auth({ usersAllowed: ['user', "admin"] }),
   VALIDATOR.deleteTenant,
   APIS.deleteTenant
 );

@@ -122,6 +122,14 @@ const response = {
       payload,
     });
   },
+
+  CATCH_EXCEPTION_ERROR({ res, message = 'Catch Error ', payload = {} } = {}) {
+    res.status(HTTP_CODES.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message,
+      payload,
+    });
+  },
 };
 
 for (const key in response) {

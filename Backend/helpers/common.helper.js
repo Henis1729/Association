@@ -31,6 +31,26 @@ function getLocalIP() {
   return localIP;
 }
 
+function generateTenantMessage(tenant) {
+
+  let { city, nearByLocation, totalPerson, startDate,
+    contactPersonName, contactPersonEmail,
+    contactPersonNumber, duration, durationType,
+    dietary, accomodationType, province } = tenant
+
+  let message;
+
+  message = `**Looking for ${accomodationType ? accomodationType : ""} " Accommodation"** in ${city}, ${province} ${nearByLocation ? "near by " + nearByLocation : ""}
+  for ${totalPerson} person from ${startDate} 
+   ${dietary ? "Preferable " + dietary : ""} 
+  ${duration && durationType ? "Preferable duration " + duration + durationType : ""}
+  ${nearByLocation ? "near by" + nearByLocation : ""}
+  Please DM ${contactPersonName} on ${contactPersonNumber} or 
+  email at ${contactPersonEmail}.`
+  
+  return message;
+}
+
 function formatTime(ms) {
   if (ms < 1000) {
     return ms + 'ms';
@@ -54,4 +74,5 @@ module.exports = {
   flatten,
   getLocalIP,
   formatTime,
+  generateTenantMessage
 };

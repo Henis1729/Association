@@ -4,59 +4,71 @@ const { MESSAGE } = require('../helpers/constant.helper');
 const env = require('../config/env.config');
 const { logger } = require('../helpers');
 const { required } = require('joi');
-const { ENUM: { ACCOMODATIONS, GENDER, DIETARY, DURATIONTYPE  } } = require('../helpers/constant.helper');
+const { ENUM: { ACCOMODATIONS, GENDER, DIETARY, DURATIONTYPE } } = require('../helpers/constant.helper');
 
 const tenantSchema = new Schema(
   {
     totalPerson: {
-        type : Number,
-        default: 1
+      type: Number,
+      default: 1,
+      index: true,
     },
     duration: {
-      type : Number,
+      type: Number,
+      index: true,
     },
     instituteName: {
-      type : String,
+      type: String,
+      index: true,
     },
     durationType: {
-      type : String,
+      type: String,
       enum: { values: [...Object.values(DURATIONTYPE)], message: 'Invalid duration type' },
     },
     personalRoom: {
-      type: Boolean, 
+      type: Boolean,
       default: false,
+      index: true,
     },
     rent: {
-      type : Number
+      type: Number,
+      index: true,
     },
     gender: {
       type: String,
       enum: { values: [...Object.values(GENDER)], message: 'Invalid gender' },
+      index: true,
     },
     city: {
       type: String,
       required: true,
+      index: true,
+    },
+    province: {
+      type: String,
+      required: true,
+      index: true,
     },
     nearByLocation: {
       type: String,
     },
-    contactPersonName : {
+    contactPersonName: {
       type: String,
       required: true,
     },
-    contactPersonEmail : {
+    contactPersonEmail: {
       type: String,
       required: true,
     },
-    contactPersonNumber : {
+    contactPersonNumber: {
       type: String,
       required: true,
     },
-    contactPersonCallingCode : {
+    contactPersonCallingCode: {
       type: String,
       required: true,
     },
-    laundry : {
+    laundry: {
       type: Boolean,
       default: true,
       required: true
@@ -64,40 +76,48 @@ const tenantSchema = new Schema(
     dietary: {
       type: String,
       enum: { values: [...Object.values(DIETARY)], message: 'Invalid dietary' },
+      index: true,
     },
-    accomodationType:{
+    accomodationType: {
       type: String,
       enum: { values: [...Object.values(ACCOMODATIONS)], message: 'Invalid accomodation' },
+      index: true,
     },
     homeCity: {
       type: String,
+      index: true,
     },
     homeState: {
       type: String,
+      index: true,
     },
     homeCountry: {
       type: String,
+      index: true,
     },
     sharingMessage: {
       type: String,
     },
     startDate: {
-       type : Date,
-       required: true
+      type: Date,
+      required: true
     },
     userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-      required: true
+      required: true,
+      index: true,
     },
     isActive: {
       type: Boolean,
       default: true,
+      index: true,
     },
     isDeleted: {
-        type: Boolean,
-        default: false,
-      },
+      type: Boolean,
+      default: false,
+      index: true,
+    },
   },
   {
     timestamps: true,
