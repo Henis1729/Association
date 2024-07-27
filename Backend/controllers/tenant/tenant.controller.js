@@ -97,6 +97,16 @@ const controllers = {
         query = { ...query, laundry: req?.body?.laundry }
       }
 
+      // Filter of user ID
+      if (req?.query?.userId) {
+        query = { ...query, userId: req?.query?.userId }
+      }
+
+      // Filter of ID
+      if (req?.query?._id) {
+        query = { ...query, _id: req?.query?._id }
+      }
+
       const tenants = await DB.TENANT.find(query);
       if (!tenants)
         return response.NO_CONTENT_FOUND({

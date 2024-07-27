@@ -30,6 +30,10 @@ module.exports = {
     }),
   }),
   getTenant: validator({
+    query: Joi.object({
+      _id: Joi.string(),
+      userId: Joi.string(),
+    }),
     body: Joi.object({
       totalPerson: Joi.number(),
       gender: Joi.string().trim(),
