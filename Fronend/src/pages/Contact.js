@@ -3,13 +3,10 @@ import Input from "../Components/UI/Input";
 import Textarea from "../Components/UI/Textarea";
 import Button from "../Components/UI/Button";
 import { Mail, Phone, MapPin } from "lucide-react";
-import Header from "../Components/Header";
-import Footer from "../Components/Footer";
 
 const ContactUs = () => {
   return (
   <>
-    <Header />
     <div className="min-h-screen bg-gradient-to-br from-blue-100 to-white py-10 px-4 sm:px-8 lg:px-24">
       <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-2xl overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-2">
@@ -72,7 +69,6 @@ const ContactUs = () => {
         </div>
       </div>
     </div>
-    <Footer />
     </>
   );
 };
