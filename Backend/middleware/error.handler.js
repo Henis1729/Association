@@ -85,6 +85,24 @@ module.exports = async (error, req, res, next) => {
     });
   }
 
+  // Handle PayloadTooLargeError (request body too large)
+  if (
+    error.type === 'entity.too.large' || 
+    error.statusCode === 413 || 
+    error.name === 'PayloadTooLargeError' ||
+    /payload.*too.*large|entity.*too.*large|request.*entity.*too.*large/i.test(error.message || '')
+  ) {
+    return response.BAD_REQUEST({
+      res,
+      message: MESSAGE.PAYLOAD_TOO_LARGE,
+      payload: { 
+        context: error.message || 'Request entity too large',
+        errorType: 'PayloadTooLargeError',
+        maxSize: process.env.JSON_BODY_LIMIT || '50mb'
+      },
+    });
+  }
+
   // Default: Internal Server Error
   return response.INTERNAL_SERVER_ERROR({
     res,

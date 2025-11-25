@@ -44,7 +44,7 @@ PROJECT_NAME=association
 NODE_ENV=development
 LOG_REQUEST_DATA=true
 PORT=3001
-JSON_BODY_LIMIT=10mb
+JSON_BODY_LIMIT=50mb
 
 MONGODB_URI=mongodb://localhost:27017/association
 BASE_URL=/api/v1

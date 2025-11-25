@@ -73,5 +73,6 @@ module.exports = {
     FILE_UPLOAD_SUCCESS: 'File uploaded successfully.',
     INVALID_FILE_TYPE: 'Invalid file type.',
     MULTER_ERROR: 'Multer error.',
+    PAYLOAD_TOO_LARGE: 'Request payload too large. Please reduce the size of your request.',
   },
 };

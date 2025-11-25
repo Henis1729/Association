@@ -12,8 +12,14 @@ app.use(require('./middleware/request.logger'));
 app.use("/public", express.static(path.join(__dirname, 'public')));
 
 app.use(require('cors')({ origin: '*' }));
+
+// Body parser with increased limits
 app.use(express.json({ limit: env.JSON_BODY_LIMIT }));
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ 
+  extended: false, 
+  limit: env.JSON_BODY_LIMIT,
+  parameterLimit: 50000 // Increase parameter limit for large forms
+}));
 
 app.use(env.BASE_URL, require('./routes/index'));
 
