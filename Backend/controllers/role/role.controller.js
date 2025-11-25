@@ -1,6 +1,7 @@
 const DB = require('../../models');
 const { MESSAGE } = require('../../helpers/constant.helper');
 const { response } = require('../../helpers');
+const { wrapControllers } = require('../../helpers/controller.wrapper');
 
 const helpers = {};
 
@@ -21,4 +22,7 @@ const controllers = {
   },
 };
 
-module.exports = { helpers, controllers };
+// Wrap all controllers with error handling
+const wrappedControllers = wrapControllers(controllers, 'Role');
+
+module.exports = { helpers, controllers: wrappedControllers };

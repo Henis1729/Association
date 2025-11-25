@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const { response, controller: controllerHelpers, logger } = require("../../helpers");
+const { wrapControllers } = require("../../helpers/controller.wrapper");
 const {
   MESSAGE,
   ENUM: { ROLE },
@@ -368,7 +369,10 @@ const controllers = {
   },
 };
 
+// Wrap all controllers with error handling
+const wrappedControllers = wrapControllers(controllers, 'User');
+
 module.exports = {
   helpers,
-  controllers,
+  controllers: wrappedControllers,
 };

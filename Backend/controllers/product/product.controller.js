@@ -3,6 +3,7 @@ const ObjectId = mongoose.Types.ObjectId;
 const DB = require("../../models");
 const { MESSAGE } = require("../../helpers/constant.helper");
 const { response } = require("../../helpers");
+const { wrapControllers } = require("../../helpers/controller.wrapper");
 const categoryModel = require("../../models/category.model");
 const subCategoryModel = require("../../models/subCategory.model");
 
@@ -180,4 +181,7 @@ const controllers = {
   },
 };
 
-module.exports = { helpers, controllers };
+// Wrap all controllers with error handling
+const wrappedControllers = wrapControllers(controllers, 'Product');
+
+module.exports = { helpers, controllers: wrappedControllers };

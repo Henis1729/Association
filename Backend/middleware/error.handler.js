@@ -13,56 +13,90 @@ const { response, logger } = require('../helpers');
 const { MESSAGE } = require('../helpers/constant.helper');
 
 module.exports = async (error, req, res, next) => {
-  if (error instanceof JsonWebTokenError || error instanceof NotBeforeError || error instanceof TokenExpiredError)
-    response.UNAUTHORIZED({
+  // Log the error first
+  logger.error({
+    message: error.message,
+    stack: error.stack,
+    url: req.originalUrl,
+    method: req.method,
+    body: req.body,
+    query: req.query,
+    params: req.params,
+    errorName: error.name,
+    errorType: error.constructor.name
+  });
+
+  // Ensure response hasn't been sent already
+  if (res.headersSent) {
+    return next(error);
+  }
+
+  // Handle different error types
+  if (error instanceof JsonWebTokenError || error instanceof NotBeforeError || error instanceof TokenExpiredError) {
+    return response.UNAUTHORIZED({
       res,
       message: MESSAGE.UNAUTHORIZED,
       payload: { context: error.message },
     });
+  }
 
-  else if (error instanceof MulterError)
-    response.BAD_REQUEST({
+  if (error instanceof MulterError) {
+    return response.BAD_REQUEST({
       res,
       message: MESSAGE.FILE_UPLOAD_FAILED,
       payload: { context: error.code },
     });
+  }
 
-  else if (
+  if (
     error instanceof DivergentArrayError ||      error instanceof VersionError ||
     error instanceof DocumentNotFoundError ||    error instanceof MongooseServerSelectionError ||
     error instanceof MissingSchemaError ||       error instanceof StrictPopulateError ||
     error instanceof OverwriteModelError ||      error instanceof ValidationError ||
     error instanceof ParallelSaveError ||        error instanceof ValidatorError ||
     error instanceof StrictModeError ||          error instanceof CastError ||
-    /Mongo/gi.test(error.name)
+    /Mongo/gi.test(error.name) ||                /Mongoose/gi.test(error.name)
   ) {
-    response.BAD_REQUEST({
+    return response.BAD_REQUEST({
+      res,
+      message: MESSAGE.FAILED,
+      payload: { 
+        context: error.message,
+        errorType: error.constructor.name,
+        // Only show stack in development
+        ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+      },
+    });
+  }
+
+  if (/Stripe/gi.test(error.type)) {
+    return response.BAD_REQUEST({
       res,
       message: MESSAGE.FAILED,
       payload: { context: error.message },
     });
   }
 
-  else if (/Stripe/gi.test(error.type))
-    response.BAD_REQUEST({
+  if (/entity.parse.failed/gi.test(error.type)) {
+    return response.BAD_REQUEST({
       res,
       message: MESSAGE.FAILED,
       payload: { context: error.message },
     });
+  }
 
-  else if (/entity.parse.failed/gi.test(error.type))
-    response.BAD_REQUEST({
-      res,
-      message: MESSAGE.FAILED,
-      payload: { context: error.message, error },
-    });
-
-  else  
-    response.INTERNAL_SERVER_ERROR({
-      res,
-      message: MESSAGE.INTERNAL_SERVER_ERROR,
-      payload: { context: error.message, error },
-    });
-  
-  return logger.error(error);
+  // Default: Internal Server Error
+  return response.INTERNAL_SERVER_ERROR({
+    res,
+    message: MESSAGE.INTERNAL_SERVER_ERROR,
+    payload: { 
+      context: error.message,
+      errorType: error.constructor.name,
+      // Only show stack and full error in development
+      ...(process.env.NODE_ENV === 'development' && { 
+        stack: error.stack,
+        error: error 
+      })
+    },
+  });
 };

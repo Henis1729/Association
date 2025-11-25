@@ -19,13 +19,22 @@ Association is a modern web platform that helps students find shared accommodati
 
 **Windows PowerShell:**
 ```powershell
-.\setup-and-run.ps1
+.\setup.ps1
 ```
 
-This automatically:
-- Creates environment files
-- Installs all dependencies
-- Starts both servers
+When you run this, you'll see an interactive menu with options:
+1. **Setup** - Creates environment files & installs dependencies
+2. **Check Status** - Verify if servers are running
+3. **Start Backend Server** - Launch backend server
+4. **Start Frontend Server** - Launch frontend server
+
+**Quick commands:**
+```powershell
+.\setup.ps1 -Setup          # Run full setup
+.\setup.ps1 -Status         # Check server status
+.\setup.ps1 -StartBackend   # Start backend server
+.\setup.ps1 -StartFrontend  # Start frontend server
+```
 
 ### Manual Setup
 
@@ -49,34 +58,14 @@ npm start
 
 ### Environment Configuration
 
-**Backend `.env` file:**
-```env
-PROJECT_NAME=association
-NODE_ENV=development
-PORT=3001
-JSON_BODY_LIMIT=10mb
+Create `.env` files in both `Backend/` and `Fronend/` directories. 
 
-MONGODB_URI=mongodb://localhost:27017/association
-BASE_URL=/api/v1
-
-JWT_SECRET=dev-secret-key-change-in-production
-JWT_EXPIRES_IN=7d
-
-EMAIL_USER=test@test.com
-EMAIL_PASSWORD=test
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-
-<!-- ACCESSKEYID=
-SECRET_KEY=
-REGION=
-BUCKET= -->
+**Use the setup script** to automatically create environment files:
+```powershell
+.\setup.ps1 -Setup
 ```
 
-**Frontend `.env` file:**
-```env
-REACT_APP_API_URL=http://localhost:3001/api/v1
-```
+This will create both `.env` files and install dependencies.
 
 ---
 
@@ -251,7 +240,7 @@ Association/
 
 **Check Status:**
 ```powershell
-.\check-status.ps1
+.\setup.ps1 -Status
 ```
 
 **Manual Check:**
@@ -359,18 +348,7 @@ npm test        # Run tests
 
 ## 🚀 Deployment
 
-### Backend (Vercel)
-- Configure via vercel.json
-- Set environment variables
-- Deploy serverless functions
-
-### Frontend
-```bash
-cd Fronend
-npm run build
-```
-- Deploy build/ folder to Vercel, Netlify, or AWS S3
-- Update API URL in production .env
+For complete Vercel deployment instructions, see **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)**
 
 ---
 
@@ -405,23 +383,31 @@ npm run build
 
 ## 🛠️ Available Scripts
 
-### Setup Scripts
-- `setup-and-run.ps1` - Complete automatic setup
-- `check-status.ps1` - Verify servers are running
-- `setup-backend-env.ps1` - Create Backend .env
-- `setup-frontend-env.ps1` - Create Frontend .env
+### Setup Script (`setup.ps1`)
 
-### Usage
+**All-in-one PowerShell script** for managing your project:
+
+**Interactive Menu:**
 ```powershell
-# Initial setup
-.\setup-and-run.ps1
+.\setup.ps1
+```
 
-# Check status
-.\check-status.ps1
+**Direct Commands:**
+```powershell
+# Run full setup (creates .env files & installs dependencies)
+.\setup.ps1 -Setup
 
-# Reconfigure
-.\setup-backend-env.ps1
-.\setup-frontend-env.ps1
+# Check if servers are running
+.\setup.ps1 -Status
+
+# Start backend server
+.\setup.ps1 -StartBackend
+
+# Start frontend server
+.\setup.ps1 -StartFrontend
+
+# Show help
+.\setup.ps1 -Help
 ```
 
 ---
@@ -462,14 +448,14 @@ npm run build
 1. **Always start Backend before Frontend**
 2. **Keep MongoDB running** throughout development
 3. **Check .env files** if connections fail
-4. **Use check-status.ps1** to verify everything
+4. **Use `.\setup.ps1 -Status`** to verify everything
 5. **Read terminal logs** for debugging
 
 ---
 
 ## 📞 Getting Help
 
-- Check `setup-and-run.ps1` output
+- Check `setup.ps1` output
 - Review terminal error messages
 - Verify environment files exist
 - Ensure MongoDB is running
