@@ -6,100 +6,159 @@ const helpers = {};
 
 const controllers = {
   createOwner: async (req, res) => {
+    try {
+      //* create Owner listing
+      const owner = await DB.OWNER.create(req.body);
 
-    //* check if category already exists by name
-    const categoryExists = await DB.Owner.findOne({ name: req.body.name });
-
-    if (categoryExists)
-      return response.DUPLICATE_VALUE({
+      return response.OK({
         res,
-        message: MESSAGE.ALREADY_EXISTS,
-        payload: { name: req.body.name },
+        message: MESSAGE.SUCCESS,
+        payload: owner,
       });
-
-    //* create Owner
-    await DB.CATEGORY.create(req.body);
-
-    return response.OK({
-      res,
-      message: MESSAGE.SUCCESS,
-      payload: req.body,
-    });
+    } catch (error) {
+      if (error.code === 11000) {
+        return response.DUPLICATE_VALUE({
+          res,
+          message: MESSAGE.ALREADY_EXISTS,
+          payload: {},
+        });
+      }
+      return response.CATCH_EXCEPTION_ERROR({
+        res,
+        message: error.message || MESSAGE.INTERNAL_SERVER_ERROR,
+        payload: {},
+      });
+    }
   },
 
   getOwner: async (req, res) => {
-    //* check if category already exists by name
-    let query = { isActive: true };
+    try {
+      let query = { isActive: true, isDeleted: { $ne: true } };
 
-    if (req.query._id) {
-      query = { _id: req.query._id };
-    }
-    if (req.query.name) {
-      query = { $regex: req.query.name, $options: "i" };
-    }
-    const categoryExists = await DB.CATEGORY.find(query);
-    if (!categoryExists)
-      return response.NO_CONTENT_FOUND({
+      // Filter by ID
+      if (req.query._id) {
+        query._id = req.query._id;
+      }
+
+      // Filter by city
+      if (req.query.city) {
+        query.city = { $regex: req.query.city, $options: "i" };
+      }
+
+      // Filter by province
+      if (req.query.province) {
+        query.province = { $regex: req.query.province, $options: "i" };
+      }
+
+      // Filter by gender
+      if (req.query.gender && req.query.gender !== 'any') {
+        query.gender = req.query.gender;
+      }
+
+      // Filter by dietary
+      if (req.query.dietary && req.query.dietary !== 'any') {
+        query.dietary = req.query.dietary;
+      }
+
+      // Filter by accommodation type
+      if (req.query.accomodationType && req.query.accomodationType !== 'any') {
+        query.accomodationType = req.query.accomodationType;
+      }
+
+      // Filter by rent (less than or equal)
+      if (req.query.rent) {
+        query.rent = { $lte: Number(req.query.rent) };
+      }
+
+      // Filter by available space
+      if (req.query.availabelSpace) {
+        query.availabelSpace = { $gte: Number(req.query.availabelSpace) };
+      }
+
+      // Filter by homeCity
+      if (req.query.homeCity) {
+        query.homeCity = { $regex: req.query.homeCity, $options: "i" };
+      }
+
+      // Filter by homeState
+      if (req.query.homeState) {
+        query.homeState = { $regex: req.query.homeState, $options: "i" };
+      }
+
+      const owners = await DB.OWNER.find(query).sort({ createdAt: -1 });
+
+      return response.OK({
         res,
-        message: MESSAGE.NOT_FOUND,
+        message: MESSAGE.SUCCESS,
+        payload: Array.isArray(owners) ? owners : [owners].filter(Boolean),
+      });
+    } catch (error) {
+      return response.CATCH_EXCEPTION_ERROR({
+        res,
+        message: error.message || MESSAGE.INTERNAL_SERVER_ERROR,
         payload: {},
       });
-
-    return response.OK({
-      res,
-      message: MESSAGE.SUCCESS,
-      payload: categoryExists,
-    });
+    }
   },
 
   updateOwner: async (req, res) => {
-    //* check if category already exists by name
+    try {
+      const owner = await DB.OWNER.findOneAndUpdate(
+        { _id: req.query._id, isDeleted: { $ne: true } },
+        { $set: req.body },
+        { new: true, runValidators: true }
+      );
 
-    const categoryExists = await DB.CATEGORY.findOneAndUpdate(
-      { _id: req.query._id },
-      { $set: req.body },
-      { new: true }
-    );
-    if (!categoryExists)
-      return response.NOT_FOUND({
+      if (!owner) {
+        return response.NOT_FOUND({
+          res,
+          message: MESSAGE.NOT_FOUND,
+          payload: {},
+        });
+      }
+
+      return response.OK({
         res,
-        message: MESSAGE.NOT_FOUND,
+        message: MESSAGE.SUCCESS,
+        payload: owner,
+      });
+    } catch (error) {
+      return response.CATCH_EXCEPTION_ERROR({
+        res,
+        message: error.message || MESSAGE.INTERNAL_SERVER_ERROR,
         payload: {},
       });
-
-    //* create category
-    // await DB.CATEGORY.create(req.body);
-
-    return response.OK({
-      res,
-      message: MESSAGE.SUCCESS,
-      payload: req.body,
-    });
+    }
   },
 
   deleteOwner: async (req, res) => {
-    //* check if category already exists by name
+    try {
+      const owner = await DB.OWNER.findOneAndUpdate(
+        { _id: req.query._id },
+        { $set: { isActive: false, isDeleted: true } },
+        { new: true }
+      );
 
-    const categoryExists = await DB.CATEGORY.findOneAndUpdate(
-      { _id: req.query._id },
-      { $set: { isActive: false } },
-      { new: true }
-    );
-    if (!categoryExists)
-      return response.NOT_FOUND({
+      if (!owner) {
+        return response.NOT_FOUND({
+          res,
+          message: MESSAGE.NOT_FOUND,
+          payload: {},
+        });
+      }
+
+      return response.OK({
         res,
-        message: MESSAGE.NOT_FOUND,
+        message: MESSAGE.SUCCESS,
+        payload: owner,
+      });
+    } catch (error) {
+      return response.CATCH_EXCEPTION_ERROR({
+        res,
+        message: error.message || MESSAGE.INTERNAL_SERVER_ERROR,
         payload: {},
       });
-
-    //* create category
-    // await DB.CATEGORY.create(req.body);
-
-    return response.OK({
-      res,
-      message: MESSAGE.SUCCESS,
-      payload: req.body,
-    });
+    }
   },
 };
 

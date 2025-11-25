@@ -31,16 +31,43 @@ const apiRequest = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(url, config);
-    const data = await response.json();
+    
+    // Check if response is JSON
+    const contentType = response.headers.get('content-type');
+    let data;
+    
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      const text = await response.text();
+      throw new Error(text || `HTTP ${response.status}: ${response.statusText}`);
+    }
 
     if (!response.ok) {
-      throw new Error(data.message || 'Something went wrong');
+      const errorMessage = data?.message || data?.error || 'Something went wrong';
+      const error = new Error(errorMessage);
+      error.status = response.status;
+      error.data = data;
+      throw error;
     }
 
     return data;
   } catch (error) {
+    // Handle network errors
+    if (error instanceof TypeError && error.message === 'Failed to fetch') {
+      const networkError = new Error('Network error: Unable to connect to server. Please check if backend is running.');
+      networkError.type = 'network';
+      throw networkError;
+    }
+    
+    // Re-throw if already formatted
+    if (error.status || error.data) {
+      throw error;
+    }
+    
+    // Handle other errors
     console.error('API Error:', error);
-    throw error;
+    throw new Error(error.message || 'An unexpected error occurred');
   }
 };
 
@@ -110,8 +137,27 @@ export const ownerAPI = {
   },
 
   getAll: async (filters = {}) => {
-    const queryParams = new URLSearchParams(filters).toString();
-    return apiRequest(`/owner${queryParams ? `?${queryParams}` : ''}`);
+    // Convert boolean strings to actual booleans
+    const cleanFilters = { ...filters };
+    Object.keys(cleanFilters).forEach(key => {
+      if (cleanFilters[key] === 'true') cleanFilters[key] = true;
+      if (cleanFilters[key] === 'false') cleanFilters[key] = false;
+      // Remove empty string filters
+      if (cleanFilters[key] === '') delete cleanFilters[key];
+    });
+    
+    const queryParams = new URLSearchParams(
+      Object.entries(cleanFilters)
+        .filter(([_, v]) => v !== undefined && v !== null && v !== '')
+        .reduce((acc, [k, v]) => ({ ...acc, [k]: String(v) }), {})
+    ).toString();
+    
+    const response = await apiRequest(`/owner${queryParams ? `?${queryParams}` : ''}`);
+    // Ensure payload is always an array
+    if (response.payload && !Array.isArray(response.payload)) {
+      response.payload = [response.payload].filter(Boolean);
+    }
+    return response;
   },
 
   getById: async (id) => {
@@ -141,8 +187,27 @@ export const tenantAPI = {
   },
 
   getAll: async (filters = {}) => {
-    const queryParams = new URLSearchParams(filters).toString();
-    return apiRequest(`/tenant${queryParams ? `?${queryParams}` : ''}`);
+    // Convert boolean strings to actual booleans
+    const cleanFilters = { ...filters };
+    Object.keys(cleanFilters).forEach(key => {
+      if (cleanFilters[key] === 'true') cleanFilters[key] = true;
+      if (cleanFilters[key] === 'false') cleanFilters[key] = false;
+      // Remove empty string filters
+      if (cleanFilters[key] === '') delete cleanFilters[key];
+    });
+    
+    const queryParams = new URLSearchParams(
+      Object.entries(cleanFilters)
+        .filter(([_, v]) => v !== undefined && v !== null && v !== '')
+        .reduce((acc, [k, v]) => ({ ...acc, [k]: String(v) }), {})
+    ).toString();
+    
+    const response = await apiRequest(`/tenant${queryParams ? `?${queryParams}` : ''}`);
+    // Ensure payload is always an array
+    if (response.payload && !Array.isArray(response.payload)) {
+      response.payload = [response.payload].filter(Boolean);
+    }
+    return response;
   },
 
   getById: async (id) => {

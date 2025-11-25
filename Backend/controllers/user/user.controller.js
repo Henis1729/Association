@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-const { response, controller: controllerHelpers } = require("../../helpers");
+const { response, controller: controllerHelpers, logger } = require("../../helpers");
 const {
   MESSAGE,
   ENUM: { ROLE },
@@ -83,11 +83,27 @@ const controllers = {
         payload: { mobile: req.body.mobile },
       });
 
-    //* check if role exists
-    console.log("req.body.role", req.body.role)
-    const role = await DB.ROLE.findOne({ name: req.body.role }).lean();
-    if (!role)
-      return response.NOT_FOUND({ res, message: MESSAGE.INVALID_ROLE });
+    //* check if role exists, if not create it automatically
+    let role = await DB.ROLE.findOne({ name: req.body.role }).lean();
+    if (!role) {
+      //* Validate that the role is a valid enum value
+      if (!Object.values(ROLE).includes(req.body.role)) {
+        return response.BAD_REQUEST({ 
+          res, 
+          message: MESSAGE.INVALID_ROLE,
+          payload: { validRoles: Object.values(ROLE), providedRole: req.body.role }
+        });
+      }
+      
+      //* Auto-create the role if it doesn't exist
+      logger.info(`⚠ Auto-creating missing role: ${req.body.role}`);
+      const newRole = await DB.ROLE.create({
+        name: req.body.role,
+        description: `${req.body.role} role`,
+        isActive: true,
+      });
+      role = newRole.toObject();
+    }
     req.body.roleId = role._id;
 
     //* create user
@@ -179,14 +195,29 @@ const controllers = {
       });
     }
 
+    //* TEMPORARILY DISABLED - Mail service
     //* send otp to email
-    await mailService.sendOTP({
-      email: req.body.email,
-      name,
-      otp,
-    });
+    //* OTP is still generated and stored in database, but email sending is disabled
+    try {
+      await mailService.sendOTP({
+        email: req.body.email,
+        name,
+        otp,
+      });
+    } catch (error) {
+      //* Mail service is disabled, but OTP is still created
+      logger.warn(`⚠ MAIL SERVICE DISABLED - OTP ${otp} generated for ${req.body.email} but not sent`);
+    }
 
-    return response.OK({ res, message: MESSAGE.SUCCESS });
+    return response.OK({ 
+      res, 
+      message: MESSAGE.SUCCESS,
+      payload: { 
+        message: 'OTP generated successfully. (Mail service is temporarily disabled)',
+        //* For development/testing: include OTP in response when mail is disabled
+        otp: process.env.NODE_ENV === 'development' ? otp : undefined
+      }
+    });
   },
 
   verifyOTP: async (req, res) => {

@@ -25,15 +25,21 @@ const envschema = Joi.object({
     return helpers.error('any.invalid');
   }, 'custom validation'),
   
-  EMAIL_USER: Joi.string().trim().required(),
-  EMAIL_PASSWORD: Joi.string().trim().required(),
-  EMAIL_HOST: Joi.string().trim().required(),
-  EMAIL_PORT: Joi.number().required(),
+  //* TEMPORARILY DISABLED - Mail service
+  // EMAIL_USER: Joi.string().trim().required(),
+  // EMAIL_PASSWORD: Joi.string().trim().required(),
+  // EMAIL_HOST: Joi.string().trim().required(),
+  // EMAIL_PORT: Joi.number().required(),
+  EMAIL_USER: Joi.string().trim().optional(),
+  EMAIL_PASSWORD: Joi.string().trim().optional(),
+  EMAIL_HOST: Joi.string().trim().optional(),
+  EMAIL_PORT: Joi.number().optional(),
   
-  ACCESSKEYID: Joi.string().trim(),
-  SECRET_KEY: Joi.string().trim(),
-  REGION: Joi.string().trim(),
-  BUCKET: Joi.string().trim(),
+  //* TEMPORARILY DISABLED - S3 service
+  // ACCESSKEYID: Joi.string().trim(),
+  // SECRET_KEY: Joi.string().trim(),
+  // REGION: Joi.string().trim(),
+  // BUCKET: Joi.string().trim(),
 });
 
 const { value: vars, error } = envschema.validate(process.env, { allowUnknown: false, stripUnknown: true, abortEarly: false });

@@ -26,6 +26,10 @@ function PostRoommate() {
     accomodationType: 'apartment',
     startDate: '',
     sharingMessage: '',
+    contactPersonName: '',
+    contactPersonEmail: '',
+    contactPersonNumber: '',
+    contactPersonCallingCode: '+1',
   });
 
   const [error, setError] = useState('');
@@ -63,16 +67,18 @@ function PostRoommate() {
 
       const response = await tenantAPI.create(dataToSend);
 
-      if (response.message === 'Success.') {
+      if (response && (response.success || response.message === 'Success.')) {
         setSuccess(true);
         setTimeout(() => {
           navigate('/browse-tenants');
         }, 2000);
       } else {
-        setError('Failed to create listing. Please try again.');
+        setError(response?.message || 'Failed to create listing. Please try again.');
       }
     } catch (err) {
-      setError(err.message || 'Failed to create listing. Please try again.');
+      const errorMessage = err.message || err.data?.message || 'Failed to create listing. Please try again.';
+      setError(errorMessage);
+      console.error('Error creating listing:', err);
     } finally {
       setLoading(false);
     }
@@ -298,6 +304,56 @@ function PostRoommate() {
                       />
                       <span className="text-gray-700">Personal Room Preferred</span>
                     </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Information */}
+              <div>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Contact Information</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Contact Name *</label>
+                    <Input
+                      name="contactPersonName"
+                      value={formData.contactPersonName}
+                      onChange={handleChange}
+                      placeholder="Your name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 font-medium mb-2">Contact Email *</label>
+                    <Input
+                      type="email"
+                      name="contactPersonEmail"
+                      value={formData.contactPersonEmail}
+                      onChange={handleChange}
+                      placeholder="your.email@example.com"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-gray-700 font-medium mb-2">Calling Code *</label>
+                      <Input
+                        name="contactPersonCallingCode"
+                        value={formData.contactPersonCallingCode}
+                        onChange={handleChange}
+                        placeholder="+1"
+                        required
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-gray-700 font-medium mb-2">Contact Number *</label>
+                      <Input
+                        name="contactPersonNumber"
+                        value={formData.contactPersonNumber}
+                        onChange={handleChange}
+                        placeholder="1234567890"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

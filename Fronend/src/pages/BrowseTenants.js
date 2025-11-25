@@ -21,13 +21,19 @@ function BrowseTenants() {
   const fetchListings = async () => {
     try {
       setLoading(true);
-      const response = await tenantAPI.getAll({ isActive: 'true' });
-      if (response.payload) {
-        setListings(response.payload);
+      setError('');
+      const response = await tenantAPI.getAll({ isActive: true });
+      if (response && response.payload) {
+        const listings = Array.isArray(response.payload) ? response.payload : [];
+        setListings(listings);
+      } else {
+        setListings([]);
       }
     } catch (err) {
-      setError('Failed to load listings. Please try again.');
+      const errorMessage = err.message || 'Failed to load listings. Please try again.';
+      setError(errorMessage);
       console.error('Error fetching listings:', err);
+      setListings([]);
     } finally {
       setLoading(false);
     }

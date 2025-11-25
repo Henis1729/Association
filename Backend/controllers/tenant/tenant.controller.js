@@ -32,154 +32,171 @@ const controllers = {
   },
 
   getTenant: async (req, res) => {
-
     try {
-      //* check TENANT start date should be greateer then today's date
-      let query = { isActive: true, startDate: { $gte: (new Date()).toISOString() } };
+      //* check TENANT start date should be greater than today's date
+      let query = { 
+        isActive: true, 
+        isDeleted: { $ne: true },
+        startDate: { $gte: new Date() } 
+      };
 
       // Filter of gender "male", "female", "any"
-      if (req?.body?.gender && req?.body?.gender != "any") {
-        query = { ...query, gender: req?.body?.gender }
+      if (req?.query?.gender && req?.query?.gender !== "any") {
+        query.gender = req.query.gender;
       }
 
-      // Filter of diatery "vegetarian", "non vegetarian", "vegan", "any"
-      if (req?.body?.dietary && req?.body?.dietary != "any") {
-        query = { ...query, dietary: req?.body?.dietary }
+      // Filter of dietary "vegetarian", "non vegetarian", "vegan", "any"
+      if (req?.query?.dietary && req?.query?.dietary !== "any") {
+        query.dietary = req.query.dietary;
       }
 
       // Filter of institute Name 
-      if (req?.body?.instituteName) {
-        query = { ...query, instituteName: { $regex: req?.body?.instituteName, $options: "i" } }
+      if (req?.query?.instituteName) {
+        query.instituteName = { $regex: req.query.instituteName, $options: "i" };
       }
 
       // Filter of accomodationType "apartment", "house", "basement"
-      if (req?.body?.accomodationType && req?.body?.dietary != "any") {
-        query = { ...query, accomodationType: req?.body?.accomodationType }
+      if (req?.query?.accomodationType && req?.query?.accomodationType !== "any") {
+        query.accomodationType = req.query.accomodationType;
       }
 
       // Filter of rent
-      if (req?.body?.rent) {
-        query = { ...query, rent: { $lte: req?.body?.rent } }
+      if (req?.query?.rent) {
+        query.rent = { $lte: Number(req.query.rent) };
       }
 
       // Filter of city
-      if (req?.body?.city) {
-        query = { ...query, city: req?.body?.city }
+      if (req?.query?.city) {
+        query.city = { $regex: req.query.city, $options: "i" };
       }
 
       // Filter of province
-      if (req?.body?.province) {
-        query = { ...query, province: req?.body?.province }
+      if (req?.query?.province) {
+        query.province = { $regex: req.query.province, $options: "i" };
       }
 
       // Filter of homeCity
-      if (req?.body?.homeCity) {
-        query = { ...query, homeCity: req?.body?.homeCity }
+      if (req?.query?.homeCity) {
+        query.homeCity = { $regex: req.query.homeCity, $options: "i" };
       }
 
       // Filter of homeState
-      if (req?.body?.homeState) {
-        query = { ...query, homeState: req?.body?.homeState }
+      if (req?.query?.homeState) {
+        query.homeState = { $regex: req.query.homeState, $options: "i" };
       }
 
       // Filter of homeCountry
-      if (req?.body?.homeCountry) {
-        query = { ...query, homeCountry: req?.body?.homeCountry }
+      if (req?.query?.homeCountry) {
+        query.homeCountry = { $regex: req.query.homeCountry, $options: "i" };
       }
 
       // Filter of personalRoom
-      if (typeof req?.body?.personalRoom == "boolean") {
-        query = { ...query, personalRoom: req?.body?.personalRoom }
+      if (req?.query?.personalRoom !== undefined) {
+        query.personalRoom = req.query.personalRoom === 'true' || req.query.personalRoom === true;
       }
 
       // Filter of laundry
-      if (typeof req?.body?.laundry == "boolean") {
-        query = { ...query, laundry: req?.body?.laundry }
+      if (req?.query?.laundry !== undefined) {
+        query.laundry = req.query.laundry === 'true' || req.query.laundry === true;
+      }
+
+      // Filter of totalPerson
+      if (req?.query?.totalPerson) {
+        query.totalPerson = { $gte: Number(req.query.totalPerson) };
       }
 
       // Filter of user ID
       if (req?.query?.userId) {
-        query = { ...query, userId: req?.query?.userId }
+        query.userId = req.query.userId;
       }
 
       // Filter of ID
       if (req?.query?._id) {
-        query = { ...query, _id: req?.query?._id }
+        query._id = req.query._id;
       }
 
-      const tenants = await DB.TENANT.find(query);
-      if (!tenants)
-        return response.NO_CONTENT_FOUND({
+      const tenants = await DB.TENANT.find(query).sort({ createdAt: -1 });
+      
+      return response.OK({
+        res,
+        message: MESSAGE.SUCCESS,
+        payload: Array.isArray(tenants) ? tenants : [tenants].filter(Boolean),
+      });
+    } catch (e) {
+      return response.CATCH_EXCEPTION_ERROR({
+        res,
+        message: e.message || MESSAGE.INTERNAL_SERVER_ERROR,
+        payload: {},
+      });
+    }
+  },
+
+  updateTenant: async (req, res) => {
+    try {
+      const tenantExists = await DB.TENANT.findOneAndUpdate(
+        { _id: req.query._id, isDeleted: { $ne: true } },
+        { $set: req.body },
+        { new: true, runValidators: true }
+      );
+      
+      if (!tenantExists) {
+        return response.NOT_FOUND({
           res,
           message: MESSAGE.NOT_FOUND,
           payload: {},
         });
+      }
+
+      // Regenerate sharing message
+      const { generateTenantMessage } = require('../../helpers/common.helper');
+      const message = generateTenantMessage(tenantExists);
+      await DB.TENANT.findOneAndUpdate(
+        { _id: req.query._id },
+        { $set: { sharingMessage: message } },
+      );
 
       return response.OK({
         res,
         message: MESSAGE.SUCCESS,
-        payload: { count: tenants.length, data: tenants },
+        payload: tenantExists,
       });
-    }
-    catch (e) {
+    } catch (error) {
       return response.CATCH_EXCEPTION_ERROR({
         res,
-        message: MESSAGE.INTERNAL_SERVER_ERROR,
+        message: error.message || MESSAGE.INTERNAL_SERVER_ERROR,
         payload: {},
       });
     }
-
-  },
-
-  updateTenant: async (req, res) => {
-    //* check if category already exists by name
-
-    const tenantExists = await DB.TENANT.findOneAndUpdate(
-      { _id: req.query._id },
-      { $set: req.body },
-      { new: true }
-    );
-    if (!tenantExists)
-      return response.NOT_FOUND({
-        res,
-        message: MESSAGE.NOT_FOUND,
-        payload: {},
-      });
-
-
-    let message = common.generateTenantMessage(tenantExists)
-    await DB.TENANT.findOneAndUpdate(
-      { _id: req.query._id },
-      { $set: { sharingMessage: message } },
-    );
-
-    return response.OK({
-      res,
-      message: MESSAGE.SUCCESS,
-      payload: req.body,
-    });
   },
 
   deleteTenant: async (req, res) => {
-    //* check if category already exists by name
+    try {
+      const tenantExists = await DB.TENANT.findOneAndUpdate(
+        { _id: req.query._id },
+        { $set: { isActive: false, isDeleted: true } },
+        { new: true }
+      );
+      
+      if (!tenantExists) {
+        return response.NOT_FOUND({
+          res,
+          message: MESSAGE.NOT_FOUND,
+          payload: {},
+        });
+      }
 
-    const tenantExists = await DB.TENANT.findOneAndUpdate(
-      { _id: req.query._id },
-      { $set: { isActive: false } },
-      { new: true }
-    );
-    if (!tenantExists)
-      return response.NOT_FOUND({
+      return response.OK({
         res,
-        message: MESSAGE.NOT_FOUND,
+        message: MESSAGE.SUCCESS,
+        payload: tenantExists,
+      });
+    } catch (error) {
+      return response.CATCH_EXCEPTION_ERROR({
+        res,
+        message: error.message || MESSAGE.INTERNAL_SERVER_ERROR,
         payload: {},
       });
-
-    return response.OK({
-      res,
-      message: MESSAGE.SUCCESS,
-      payload: req.body,
-    });
+    }
   },
 };
 

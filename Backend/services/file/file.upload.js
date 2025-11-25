@@ -1,9 +1,12 @@
-const { S3Client, ListBucketsCommand } = require('@aws-sdk/client-s3');
+//* TEMPORARILY DISABLED - S3 imports
+// const { S3Client, ListBucketsCommand } = require('@aws-sdk/client-s3');
 const multer = require('multer');
-const multerS3 = require('multer-s3');
+//* TEMPORARILY DISABLED - S3 multer
+// const multerS3 = require('multer-s3');
 const path = require('path');
 const fs = require('fs');
 
+//* S3 is temporarily disabled - will return null, so multerLocal will be used by default
 const s3 = require('../../config/s3.config');
 const { MESSAGE } = require('../../helpers/constant.helper');
 const { response } = require('../../helpers');
@@ -44,26 +47,28 @@ uploadMethods.multerLocal = multer({
   }),
 });
 
+//* TEMPORARILY DISABLED - S3 upload
 //* only used if req.headers['s3-upload'] is true
-if (s3) {
-  uploadMethods.multerS3 = multer({
-    storage: multerS3({
-    s3,
-    bucket: env.BUCKET,
-    contentType: multerS3.AUTO_CONTENT_TYPE,
-    metadata: function (req, file, cb) {
-      cb(null, { fieldName: file.fieldname });
-    },
-    key: function (req, file, cb) {
-      const dir = getDirectory({ fieldName: file.fieldname });
-      
-      //* file name will be generated from following
-      const fileName = `${new Date().getTime()}-${(new Date().getTime()) * Math.random()}-${file.originalname}`;
-      cb(null, `${BASE_DIR}/${dir}/${fileName}`);
-    },
-  }),
-});
-}
+//* S3 is disabled, so only multerLocal will be used
+// if (s3) {
+//   uploadMethods.multerS3 = multer({
+//     storage: multerS3({
+//     s3,
+//     bucket: env.BUCKET,
+//     contentType: multerS3.AUTO_CONTENT_TYPE,
+//     metadata: function (req, file, cb) {
+//       cb(null, { fieldName: file.fieldname });
+//     },
+//     key: function (req, file, cb) {
+//       const dir = getDirectory({ fieldName: file.fieldname });
+//       
+//       //* file name will be generated from following
+//       const fileName = `${new Date().getTime()}-${(new Date().getTime()) * Math.random()}-${file.originalname}`;
+//       cb(null, `${BASE_DIR}/${dir}/${fileName}`);
+//     },
+//   }),
+// });
+// }
 
 const errorHandler = ({ req, res, error }) => response.BAD_REQUEST({
   res, message: MESSAGE.FILE_UPLOAD_FAILED, payload: error,
@@ -78,7 +83,9 @@ const upload = {
   //* reqBodyFieldName is the name of the field in req.body where file path will be stored
   single({ fieldName, reqBodyFieldName = 'image' } = {}) {
     return async (req, res, next) => {
-      const multerUploadMethod = req.headers['s3-upload'] === 'true' ? 'multerS3' : 'multerLocal';
+      //* TEMPORARILY DISABLED - S3 upload (always use local storage)
+      // const multerUploadMethod = req.headers['s3-upload'] === 'true' ? 'multerS3' : 'multerLocal';
+      const multerUploadMethod = 'multerLocal'; // Always use local storage
 
       uploadMethods[multerUploadMethod].single(fieldName)(req, res, (error) => {
         if (error) return errorHandler({ req, res, error });
@@ -98,7 +105,9 @@ const upload = {
     fieldName, maxCount = 10, reqBodyFieldName = 'images', isSRCFormat = true,
   } = {}) {
     return async (req, res, next) => {
-      const multerUploadMethod = req.headers['s3-upload'] === 'true' ? 'multerS3' : 'multerLocal';
+      //* TEMPORARILY DISABLED - S3 upload (always use local storage)
+      // const multerUploadMethod = req.headers['s3-upload'] === 'true' ? 'multerS3' : 'multerLocal';
+      const multerUploadMethod = 'multerLocal'; // Always use local storage
 
       uploadMethods[multerUploadMethod].array(fieldName, maxCount)(
         req, res, (error) => {
@@ -128,7 +137,9 @@ const upload = {
     }
   ) {
     return async (req, res, next) => {
-      const multerUploadMethod = req.headers['s3-upload'] === 'true' ? 'multerS3' : 'multerLocal';
+      //* TEMPORARILY DISABLED - S3 upload (always use local storage)
+      // const multerUploadMethod = req.headers['s3-upload'] === 'true' ? 'multerS3' : 'multerLocal';
+      const multerUploadMethod = 'multerLocal'; // Always use local storage
 
       uploadMethods[multerUploadMethod].fields(fields)(req, res, (error) => {
         if (error) return errorHandler({ req, res, error });

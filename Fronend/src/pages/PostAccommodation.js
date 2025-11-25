@@ -59,7 +59,7 @@ function PostAccommodation() {
     setError('');
 
     try {
-      // Convert number fields
+      // Convert number fields and fix field names
       const dataToSend = {
         ...formData,
         availabelSpace: Number(formData.availabelSpace),
@@ -68,20 +68,26 @@ function PostAccommodation() {
         duration: formData.duration ? Number(formData.duration) : undefined,
         nearestBusStopDistance: formData.nearestBusStopDistance ? Number(formData.nearestBusStopDistance) : undefined,
         startDate: new Date(formData.startDate),
+        Laundry: formData.laundry, // Backend expects capital L
       };
+      
+      // Remove lowercase laundry field
+      delete dataToSend.laundry;
 
       const response = await ownerAPI.create(dataToSend);
 
-      if (response.message === 'Success.') {
+      if (response && (response.success || response.message === 'Success.')) {
         setSuccess(true);
         setTimeout(() => {
           navigate('/browse-owners');
         }, 2000);
       } else {
-        setError('Failed to create listing. Please try again.');
+        setError(response?.message || 'Failed to create listing. Please try again.');
       }
     } catch (err) {
-      setError(err.message || 'Failed to create listing. Please try again.');
+      const errorMessage = err.message || err.data?.message || 'Failed to create listing. Please try again.';
+      setError(errorMessage);
+      console.error('Error creating listing:', err);
     } finally {
       setLoading(false);
     }

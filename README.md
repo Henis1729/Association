@@ -67,10 +67,10 @@ EMAIL_PASSWORD=test
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587
 
-ACCESSKEYID=
+<!-- ACCESSKEYID=
 SECRET_KEY=
 REGION=
-BUCKET=
+BUCKET= -->
 ```
 
 **Frontend `.env` file:**

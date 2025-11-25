@@ -1,9 +1,10 @@
-const { HeadObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+//* TEMPORARILY DISABLED - S3 imports
+// const { HeadObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
 const fs = require('fs');
 const path = require('path');
 
 const env = require('../../config/env.config');
-const s3 =  require('../../config/s3.config');
+const s3 = require('../../config/s3.config');
 
 
 //* delete file from local
@@ -21,32 +22,38 @@ const deleteLocalFile = ({ filePath }) => {
     }
 };
 
+//* TEMPORARILY DISABLED - S3 service
 //* check if file exists in s3
 //* Key format one: https://bucket-name.s3.region.amazonaws.com/project-name/node-env/file-name
 //* Key format two: project-name/node-env/file-name
 const doesS3FileExists = async ({ Key, Bucket = env.BUCKET } = {}) => {
-    try {
-        if (Key.startsWith('http')) Key = Key.split('.com')[1].substr(1);
-        const data = await s3.send(new HeadObjectCommand({ Key, Bucket }));
-        return data;
-    } catch (error) {
-        return null;
-    }
+    //* TEMPORARILY DISABLED
+    // try {
+    //     if (Key.startsWith('http')) Key = Key.split('.com')[1].substr(1);
+    //     const data = await s3.send(new HeadObjectCommand({ Key, Bucket }));
+    //     return data;
+    // } catch (error) {
+    //     return null;
+    // }
+    return null;
 };
 
+//* TEMPORARILY DISABLED - S3 service
 //* delete file from s3
 //* Key format one: https://bucket-name.s3.region.amazonaws.com/project-name/node-env/file-name
 //* Key format two: project-name/node-env/file-name
 const deleteS3File = async({ Key, Bucket = env.BUCKET } = {}) => {
-    try {
-        if (Key.startsWith('http')) Key = Key.split('.com')[1].substr(1);
-        const doesFileExists = await doesS3FileExists({ Key, Bucket });
-        if (!doesFileExists) return null;
-        const data = await s3.send(new DeleteObjectCommand({ Key, Bucket }));
-        return data;
-    } catch (error) {
-        return null;
-    }
+    //* TEMPORARILY DISABLED
+    // try {
+    //     if (Key.startsWith('http')) Key = Key.split('.com')[1].substr(1);
+    //     const doesFileExists = await doesS3FileExists({ Key, Bucket });
+    //     if (!doesFileExists) return null;
+    //     const data = await s3.send(new DeleteObjectCommand({ Key, Bucket }));
+    //     return data;
+    // } catch (error) {
+    //     return null;
+    // }
+    return null;
 };
 
 module.exports = {

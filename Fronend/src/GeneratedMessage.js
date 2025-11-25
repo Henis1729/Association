@@ -1,49 +1,108 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const GeneratedMessage = ({ person }) => {
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    if (!dateString) return '[Select date]';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  };
+
+  // Helper function to format gender
+  const formatGender = (gender) => {
+    if (!gender || gender === 'any') return 'any gender preference';
+    return gender === 'male' ? 'male-only' : 'female-only';
+  };
+
+  // Helper function to format dietary
+  const formatDietary = (dietary) => {
+    if (!dietary || dietary === 'any') return '';
+    return dietary === 'vegetarian' ? 'vegetarian' : dietary === 'vegan' ? 'vegan' : 'non-vegetarian';
+  };
+
+  // Helper function to format accommodation type
+  const formatAccommodation = (type) => {
+    if (!type || type === 'any') return 'apartment, house, or basement';
+    const types = {
+      apartment: 'apartment',
+      house: 'house',
+      basement: 'basement'
+    };
+    return types[type] || type;
+  };
+
+  const city = person.city || '[City Name]';
+  const name = person.name || '[Your Name]';
+  const studyWork = person.studyWork || 'studying';
+  const instituteName = person.instituteName ? ` at ${person.instituteName}` : '';
+  const noOfPerson = person.noOfPerson || '1';
+  const moveDate = formatDate(person.moveDate);
+  const budget = person.budget ? `$${person.budget}/month` : '[Budget]';
+  const accommodationType = formatAccommodation(person.accommodationType);
+  const gender = formatGender(person.gender);
+  const noOfRooms = person.noOfRooms || '1';
+  const dietary = formatDietary(person.dietary);
+  const contactNumber = person.contactNumber || '[Your Contact Number]';
+  const province = person.province ? `, ${person.province}` : '';
+
+  // Generate clean text version for copying (stored in data attribute)
+  const generateCleanText = () => {
+    let text = `Subject: Seeking Accommodation in ${city}\n\n`;
+    text += `Hi! My name is ${name} and I'm ${studyWork}${instituteName} in ${city}${province}. I'm looking for accommodation that matches my requirements.\n\n`;
+    text += `Requirements:\n`;
+    text += `• ${noOfPerson} person${noOfPerson !== '1' ? 's' : ''}\n`;
+    text += `• Move-in: ${moveDate}\n`;
+    if (person.budget) text += `• Budget: ${budget}\n`;
+    text += `• Type: ${accommodationType}\n`;
+    if (person.gender && person.gender !== 'any') text += `• Gender: ${gender}\n`;
+    if (person.noOfRooms) text += `• Rooms: ${noOfRooms}\n`;
+    if (dietary) text += `• Dietary: ${dietary}\n`;
+    text += `\nIf you have any properties available, please contact me at ${contactNumber}. Thank you!\n\n`;
+    text += `Best regards,\n${name}`;
+    return text;
+  };
+
+  useEffect(() => {
+    // Store clean text version in data attribute for easy copying
+    const messageElement = document.getElementById('generated-message');
+    if (messageElement) {
+      messageElement.setAttribute('data-copy-text', generateCleanText());
+    }
+  }, [person]);
+
   return (
-    <div className=' text-left'>
-      <div className="mt-4">
-        <h1 className="text-blue-500 font-bold text-lg">
-          Subject: Seeking Accommodation in [City Name]{person.city}
-        </h1>
-        <p className='mt-3'>
-          My name is {person.name}, and I am currently [studying/working] in {person.city}. As I am in the process of seeking accommodation, I am reaching
-          out to inquire about any options you may have available that align
-          with my requirements.
-        </p>
-        <p className='mt-3'>
-          I am in need of accommodation for {person.noOfPerson} individuals and
-          am looking to move in by {person.moveDate}. My budget
-          for rent is [budget], and I am open to various types of accommodation
-          such as apartments, houses, or basements. Regarding gender preference,
-          [state your preference as girls/boys/any].
-        </p>
-        <p className='mt-3'>
-          In terms of amenities, I prefer utilities to be [included/excluded],
-          and it would be convenient if the accommodation is situated near
-          [nearest bus stop]. For any further inquiries or to schedule a
-          viewing, please feel free to contact me at [your contact number].
-        </p>
-        <p className='mt-3'>
-          Additionally, if laundry facilities are available on-site, it would be
-          beneficial. Regarding dietary preferences, I adhere to [pure
-          veg/non-veg/vegan] options. My preferred location is in [State and
-          City], and I require {person.noOfRooms} rooms. Furnishing preferences
-          include [furnished/unfurnished].
-        </p>
-        <p className='mt-3'>
-          I would be grateful if you could provide any information on suitable
-          options you may have. Thank you for considering my request. Looking
-          forward to hearing from you soon.
-        </p>
-        <p className='mt-3'>Best regards, {person.name}</p>
+    <div id="generated-message" className="text-gray-800 space-y-3 leading-relaxed">
+      <div className="text-blue-600 font-semibold text-lg mb-3 pb-2 border-b border-blue-200">
+        🏠 Subject: Seeking Accommodation in {city}
       </div>
-      <div>
-        <button className="bg-blue-600 text-white px-3 py-2 rounded-md mt-4">
-          Copy Message
-        </button>
+
+      <p className="text-base">
+        Hi! 👋 My name is <span className="font-semibold text-gray-900">{name}</span> and I'm {studyWork}{instituteName} in <span className="font-semibold">{city}{province}</span>. I'm looking for accommodation that matches my requirements.
+      </p>
+
+      <div className="bg-white/60 rounded-lg p-4 border border-gray-200">
+        <p className="font-semibold text-gray-900 mb-2 text-base">
+          📋 My Requirements:
+        </p>
+        <ul className="list-none space-y-1.5 text-sm">
+          <li>👥 <span className="font-medium">{noOfPerson} person{noOfPerson !== '1' ? 's' : ''}</span></li>
+          <li>📅 <span className="font-medium">Move-in:</span> {moveDate}</li>
+          {person.budget && <li>💰 <span className="font-medium">Budget:</span> {budget}</li>}
+          <li>🏠 <span className="font-medium">Type:</span> {accommodationType}</li>
+          {person.gender && person.gender !== 'any' && <li>⚧️ <span className="font-medium">Gender:</span> {gender}</li>}
+          {person.noOfRooms && <li>🚪 <span className="font-medium">Rooms:</span> {noOfRooms}</li>}
+          {dietary && <li>🥗 <span className="font-medium">Dietary:</span> {dietary}</li>}
+        </ul>
       </div>
+
+      <p className="text-base">
+        If you have any properties available, please contact me at <span className="font-semibold text-blue-600">📞 {contactNumber}</span>. Thank you! 🙏
+      </p>
+
+      <p className="text-base pt-2 mt-2 border-t border-gray-200">
+        Best regards,<br />
+        <span className="font-semibold text-gray-900">{name}</span>
+      </p>
     </div>
   );
 };
